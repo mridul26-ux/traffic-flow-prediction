@@ -1,0 +1,31 @@
+{
+    "multi_horizon_flow_metrics": {
+        "t+5min": {
+            "MAE": 7.35,
+            "RMSE": 9.4441,
+            "MAPE (%)": 22.41,
+            "R2 Score": 0.9368
+        },
+        "t+10min": {
+            "MAE": 7.324,
+            "RMSE": 9.5782,
+            "MAPE (%)": 22.72,
+            "R2 Score": 0.935
+        },
+        "t+15min": {
+            "MAE": 7.4689,
+            "RMSE": 9.8895,
+            "MAPE (%)": 22.75,
+            "R2 Score": 0.9308
+        }
+    },
+    "classification_metrics": {
+        "Accuracy": 0.872,
+        "Macro Precision": 0.6439,
+        "Macro Recall": 0.6426,
+        "Macro F1": 0.6399,
+        "Weighted Precision": 0.8564,
+        "Weighted Recall": 0.872,
+        "Weighted F1": 0.8608
+    }
+}

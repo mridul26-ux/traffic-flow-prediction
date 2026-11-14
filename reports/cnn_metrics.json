@@ -1,0 +1,17 @@
+{
+    "vehicle_count_metrics": {
+        "MAE": 0.8152,
+        "RMSE": 1.0904,
+        "MAPE (%)": 10.27,
+        "R2 Score": 0.9593
+    },
+    "classification_metrics": {
+        "Accuracy": 0.6579,
+        "Macro Precision": 0.5738,
+        "Macro Recall": 0.4608,
+        "Macro F1": 0.43,
+        "Weighted Precision": 0.6621,
+        "Weighted Recall": 0.6579,
+        "Weighted F1": 0.59
+    }
+}
