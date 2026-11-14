@@ -3,38 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Traffic Flow Prediction | CNN-LSTM System</title>
+  <title>Corridor Traffic Flow Monitor</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    @keyframes pulse-subtle {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.85; }
-    }
-    .status-pulse { animation: pulse-subtle 2s infinite ease-in-out; }
-  </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
   <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <span class="text-2xl">🚦</span>
+        <div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow">
+          TF
+        </div>
         <div>
-          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            Traffic Flow Prediction System
-            <span class="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-0.5 rounded-full border border-indigo-500/30">CNN + LSTM</span>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+            Corridor Traffic Monitor
+            <span class="text-xs font-normal text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">CNN-BiLSTM Pipeline</span>
           </h1>
-          <p class="text-xs text-slate-400">Road-Camera Surveillance & Short-Term Traffic Forecaster (Vercel Edition)</p>
+          <p class="text-xs text-slate-400">Road-camera vehicle detection and 15-minute predictive traffic forecasting</p>
         </div>
       </div>
-      <div class="flex items-center gap-3">
-        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-1 rounded-full">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          Live Ingestion Active
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/70 border border-emerald-800 px-2.5 py-1 rounded">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Camera Stream Online
         </span>
       </div>
     </div>
@@ -44,30 +39,30 @@
   <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
     <!-- Scenario Controls & Flow Slider -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-lg">
+    <section class="bg-slate-900 border border-slate-800 rounded-lg p-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Simulate Real-World Traffic Scenario</label>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Traffic Regime Preset</label>
           <div class="flex flex-wrap gap-2" id="scenario-btn-group">
-            <button onclick="setScenario('rush_hour')" class="scenario-btn active px-3.5 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow hover:bg-indigo-500 transition">
-              🌅 Morning Rush Hour
+            <button onclick="setScenario('rush_hour')" class="scenario-btn active px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition">
+              Morning Peak (8:30 AM)
             </button>
-            <button onclick="setScenario('moderate')" class="scenario-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-              ☀️ Midday Normal Flow
+            <button onclick="setScenario('moderate')" class="scenario-btn px-3 py-1.5 rounded text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+              Midday Traffic (1:00 PM)
             </button>
-            <button onclick="setScenario('night')" class="scenario-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-              🌙 Night Free Flow
+            <button onclick="setScenario('night')" class="scenario-btn px-3 py-1.5 rounded text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+              Night Flow (11:00 PM)
             </button>
-            <button onclick="setScenario('bottleneck')" class="scenario-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-              ⚠️ Highway Incident / Bottleneck
+            <button onclick="setScenario('bottleneck')" class="scenario-btn px-3 py-1.5 rounded text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+              Corridor Incident / Stalled Lane
             </button>
           </div>
         </div>
 
         <div class="w-full md:w-64">
           <div class="flex justify-between text-xs text-slate-400 mb-1">
-            <span>Manual Flow Tuning:</span>
-            <span id="slider-val" class="font-bold text-indigo-400">118 veh/5min</span>
+            <span>Target Corridor Inflow:</span>
+            <span id="slider-val" class="font-semibold text-indigo-400">118 veh/5min</span>
           </div>
           <input type="range" id="flow-slider" min="15" max="145" value="118" oninput="onSliderChange(this.value)" class="w-full accent-indigo-500 bg-slate-800 rounded h-1.5 cursor-pointer">
         </div>
@@ -76,41 +71,41 @@
 
     <!-- Top KPI Grid -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-        <span class="text-xs text-slate-400 block mb-1">Live Camera Vehicle Count</span>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+        <span class="text-xs text-slate-400 block mb-1">Camera Detected Vehicles</span>
         <div class="flex items-baseline gap-2">
-          <span id="kpi-count" class="text-2xl font-extrabold text-white">16.4</span>
+          <span id="kpi-count" class="text-2xl font-bold text-white">16.4</span>
           <span class="text-xs text-slate-500">vehicles</span>
         </div>
-        <div class="text-[11px] text-indigo-400 mt-1">CNN Spatial Estimator</div>
+        <div class="text-[11px] text-slate-400 mt-1">Spatial Density Estimator</div>
       </div>
 
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-        <span class="text-xs text-slate-400 block mb-1">Estimated Inflow Rate</span>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+        <span class="text-xs text-slate-400 block mb-1">Measured Flow Rate</span>
         <div class="flex items-baseline gap-2">
-          <span id="kpi-flow" class="text-2xl font-extrabold text-cyan-400">118.5</span>
+          <span id="kpi-flow" class="text-2xl font-bold text-cyan-400">118.5</span>
           <span class="text-xs text-slate-500">veh / 5-min</span>
         </div>
-        <div class="text-[11px] text-slate-400 mt-1" id="kpi-flow-hr">~1,422 veh/hr</div>
+        <div class="text-[11px] text-slate-400 mt-1" id="kpi-flow-hr">~1,422 vehicles/hr</div>
       </div>
 
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-        <span class="text-xs text-slate-400 block mb-1">Average Corridor Speed</span>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+        <span class="text-xs text-slate-400 block mb-1">Average Vehicle Speed</span>
         <div class="flex items-baseline gap-2">
-          <span id="kpi-speed" class="text-2xl font-extrabold text-emerald-400">34.2</span>
+          <span id="kpi-speed" class="text-2xl font-bold text-emerald-400">34.2</span>
           <span class="text-xs text-slate-500">km/h</span>
         </div>
-        <div class="text-[11px] text-slate-400 mt-1" id="kpi-occupancy">Occupancy: 68.4%</div>
+        <div class="text-[11px] text-slate-400 mt-1" id="kpi-occupancy">Road Occupancy: 68.4%</div>
       </div>
 
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-        <span class="text-xs text-slate-400 block mb-1">Traffic Congestion State</span>
+      <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+        <span class="text-xs text-slate-400 block mb-1">Current Traffic State</span>
         <div class="mt-1">
-          <span id="kpi-badge" class="inline-block px-3 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 status-pulse">
+          <span id="kpi-badge" class="inline-block px-2.5 py-1 rounded text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
             HEAVY CONGESTION
           </span>
         </div>
-        <div class="text-[11px] text-slate-400 mt-2">LSTM Attention Classifier</div>
+        <div class="text-[11px] text-slate-400 mt-2">Corridor Status Alert</div>
       </div>
     </section>
 
@@ -118,42 +113,41 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- Left Column: Road Camera Video Simulation Canvas -->
-      <section class="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+      <section class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>📹</span> Road-Camera Live Stream Feed (CNN Ingestion)
+          <h2 class="text-sm font-semibold text-white">
+            Road Surveillance Feed (Live Optical Ingestion)
           </h2>
-          <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">640×360 • 30 FPS</span>
+          <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">Camera #04 North</span>
         </div>
 
-        <div class="relative w-full aspect-video rounded-lg overflow-hidden border border-slate-800 bg-black">
+        <div class="relative w-full aspect-video rounded overflow-hidden border border-slate-800 bg-slate-950">
           <canvas id="camera-canvas" width="640" height="360" class="w-full h-full object-cover"></canvas>
           
-          <!-- Overlay HUD HUD -->
-          <div class="absolute top-2 left-2 bg-slate-950/80 backdrop-blur px-2.5 py-1.5 rounded text-[11px] text-slate-200 border border-slate-800">
-            <div>CAM-04 CORRIDOR NORTH</div>
-            <div class="text-cyan-400 font-mono" id="hud-stats">Live Detections: 16 veh</div>
+          <div class="absolute top-2 left-2 bg-slate-950/80 px-2.5 py-1.5 rounded text-[11px] text-slate-200 border border-slate-800 font-mono">
+            <div>INTERSECTION 14 - SOUTHBOUND</div>
+            <div class="text-cyan-400" id="hud-stats">Live Detections: 16 veh</div>
           </div>
 
-          <div class="absolute bottom-2 left-2 right-2 bg-slate-950/85 backdrop-blur px-3 py-1.5 rounded text-xs flex justify-between items-center border border-slate-800 text-slate-300">
-            <span class="text-indigo-400 font-medium">LSTM Short-Term Forecast:</span>
+          <div class="absolute bottom-2 left-2 right-2 bg-slate-950/85 px-3 py-1.5 rounded text-xs flex justify-between items-center border border-slate-800 text-slate-300">
+            <span class="text-slate-400">BiLSTM Predictive Output:</span>
             <span id="hud-forecast" class="font-mono text-emerald-400">+5m: 120.9 | +10m: 124.4 | +15m: 122.1</span>
           </div>
         </div>
 
         <p class="text-xs text-slate-500 mt-3">
-          *The road surveillance canvas renders continuous multi-lane perspective traffic. CNN filters segment vehicle bounding boxes and extract spatial density embeddings.
+          Simulated camera frame with dynamic vehicle motion. CNN bounding boxes locate vehicles and extract visual density features.
         </p>
       </section>
 
       <!-- Right Column: LSTM Traffic Flow Forecast Chart -->
-      <section class="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+      <section class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>📈</span> LSTM Short-Term Traffic Flow Forecast
+          <h2 class="text-sm font-semibold text-white">
+            Short-Term Traffic Volume Forecast
           </h2>
-          <span class="text-[11px] text-emerald-400 bg-emerald-950/50 border border-emerald-800/60 px-2 py-0.5 rounded">
-            95% Confidence Bounds
+          <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+            95% Confidence Interval
           </span>
         </div>
 
@@ -161,80 +155,80 @@
           <canvas id="forecastChart"></canvas>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800 text-center">
-          <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
-            <span class="text-[11px] text-slate-400 block">+5 Min Horizon</span>
+        <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800 text-center font-mono">
+          <div class="bg-slate-950 p-2 rounded border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-sans block">+5 Min Horizon</span>
             <span id="fc-5m" class="text-sm font-bold text-emerald-400">120.9 veh</span>
           </div>
-          <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
-            <span class="text-[11px] text-slate-400 block">+10 Min Horizon</span>
+          <div class="bg-slate-950 p-2 rounded border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-sans block">+10 Min Horizon</span>
             <span id="fc-10m" class="text-sm font-bold text-cyan-400">124.4 veh</span>
           </div>
-          <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
-            <span class="text-[11px] text-slate-400 block">+15 Min Horizon</span>
+          <div class="bg-slate-950 p-2 rounded border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-sans block">+15 Min Horizon</span>
             <span id="fc-15m" class="text-sm font-bold text-indigo-400">122.1 veh</span>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- System Evaluation Benchmark Table -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg">
-      <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-        <span>📊</span> Model Evaluation Metrics & Validation Benchmarks
+    <!-- Evaluation Summary Table -->
+    <section class="bg-slate-900 border border-slate-800 rounded-lg p-5">
+      <h3 class="text-sm font-semibold text-white mb-3">
+        Model Test Benchmark Summary
       </h3>
       <div class="overflow-x-auto">
         <table class="w-full text-xs text-left text-slate-300">
           <thead class="text-[11px] uppercase bg-slate-950 text-slate-400 border-b border-slate-800">
             <tr>
-              <th class="py-2.5 px-3">Model Component</th>
-              <th class="py-2.5 px-3">Target Objective</th>
+              <th class="py-2.5 px-3">Model</th>
+              <th class="py-2.5 px-3">Task</th>
               <th class="py-2.5 px-3">MAE</th>
               <th class="py-2.5 px-3">RMSE</th>
               <th class="py-2.5 px-3">MAPE (%)</th>
-              <th class="py-2.5 px-3">R² Score / Accuracy</th>
+              <th class="py-2.5 px-3">Score</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/70 font-mono">
             <tr>
-              <td class="py-2.5 px-3 font-sans font-semibold text-indigo-400">CNN Vehicle Detector</td>
-              <td class="py-2.5 px-3 font-sans text-slate-300">Frame Vehicle Density Estimation</td>
+              <td class="py-2.5 px-3 font-sans font-medium text-slate-200">Custom CNN</td>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Vehicle Density Estimation</td>
               <td class="py-2.5 px-3 text-emerald-400">0.815 veh</td>
               <td class="py-2.5 px-3">1.090</td>
               <td class="py-2.5 px-3">10.27%</td>
-              <td class="py-2.5 px-3 font-bold text-emerald-400">R² = 0.9593</td>
+              <td class="py-2.5 px-3 text-emerald-400">R² = 0.9593</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 font-sans font-semibold text-emerald-400">LSTM Forecaster (+5m)</td>
-              <td class="py-2.5 px-3 font-sans text-slate-300">Short-Term Flow (5 min ahead)</td>
+              <td class="py-2.5 px-3 font-sans font-medium text-slate-200">BiLSTM + Attention</td>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Flow Forecast (t + 5 min)</td>
               <td class="py-2.5 px-3 text-emerald-400">7.350 veh</td>
               <td class="py-2.5 px-3">9.444</td>
               <td class="py-2.5 px-3">22.41%</td>
-              <td class="py-2.5 px-3 font-bold text-emerald-400">R² = 0.9368</td>
+              <td class="py-2.5 px-3 text-emerald-400">R² = 0.9368</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 font-sans font-semibold text-cyan-400">LSTM Forecaster (+10m)</td>
-              <td class="py-2.5 px-3 font-sans text-slate-300">Medium-Term Flow (10 min ahead)</td>
+              <td class="py-2.5 px-3 font-sans font-medium text-slate-200">BiLSTM + Attention</td>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Flow Forecast (t + 10 min)</td>
               <td class="py-2.5 px-3 text-emerald-400">7.324 veh</td>
               <td class="py-2.5 px-3">9.578</td>
               <td class="py-2.5 px-3">22.72%</td>
-              <td class="py-2.5 px-3 font-bold text-emerald-400">R² = 0.9350</td>
+              <td class="py-2.5 px-3 text-emerald-400">R² = 0.9350</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 font-sans font-semibold text-purple-400">LSTM Forecaster (+15m)</td>
-              <td class="py-2.5 px-3 font-sans text-slate-300">Extended-Term Flow (15 min ahead)</td>
+              <td class="py-2.5 px-3 font-sans font-medium text-slate-200">BiLSTM + Attention</td>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Flow Forecast (t + 15 min)</td>
               <td class="py-2.5 px-3 text-emerald-400">7.469 veh</td>
               <td class="py-2.5 px-3">9.890</td>
               <td class="py-2.5 px-3">22.75%</td>
-              <td class="py-2.5 px-3 font-bold text-emerald-400">R² = 0.9308</td>
+              <td class="py-2.5 px-3 text-emerald-400">R² = 0.9308</td>
             </tr>
             <tr>
-              <td class="py-2.5 px-3 font-sans font-semibold text-amber-400">LSTM Classifier</td>
-              <td class="py-2.5 px-3 font-sans text-slate-300">Future Congestion Regime (4 classes)</td>
+              <td class="py-2.5 px-3 font-sans font-medium text-slate-200">BiLSTM Head</td>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Congestion Classification</td>
               <td class="py-2.5 px-3 text-slate-500">—</td>
               <td class="py-2.5 px-3 text-slate-500">—</td>
               <td class="py-2.5 px-3 text-slate-500">—</td>
-              <td class="py-2.5 px-3 font-bold text-emerald-400">Acc = 87.20% (F1 = 0.86)</td>
+              <td class="py-2.5 px-3 text-emerald-400">Acc = 87.20% (F1 = 0.86)</td>
             </tr>
           </tbody>
         </table>
@@ -245,21 +239,17 @@
 
   <!-- Footer -->
   <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500">
-    Traffic Flow Prediction Intelligent Transportation System • Powered by CNN + BiLSTM Attention
+    Traffic Flow Prediction Project • Department of Computer Science & Engineering
   </footer>
 
   <!-- Script for Canvas Simulation & Chart.js -->
   <script>
-    // State
     let currentScenario = "rush_hour";
     let chartInstance = null;
-    let currentData = null;
 
-    // Canvas Simulator
     const canvas = document.getElementById("camera-canvas");
     const ctx = canvas.getContext("2d");
     
-    // Simulated vehicles
     let vehicles = [];
     const VEHICLE_COLORS = ["#3b82f6", "#10b981", "#f97316", "#a855f7"];
     
@@ -281,15 +271,12 @@
       const h = canvas.height;
       const horizon = h * 0.30;
 
-      // Clear
       ctx.fillStyle = "#1e293b";
       ctx.fillRect(0, 0, w, h);
 
-      // Sky
       ctx.fillStyle = "#334155";
       ctx.fillRect(0, 0, w, horizon);
 
-      // Road asphalt
       ctx.fillStyle = "#0f172a";
       ctx.beginPath();
       ctx.moveTo(w * 0.35, horizon);
@@ -299,7 +286,6 @@
       ctx.closePath();
       ctx.fill();
 
-      // Road borders
       ctx.strokeStyle = "#cbd5e1";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -309,7 +295,6 @@
       ctx.lineTo(w * 0.95, h);
       ctx.stroke();
 
-      // Dashed lane dividers
       ctx.strokeStyle = "#e2e8f0";
       ctx.setLineDash([8, 12]);
       for (let t of [0.33, 0.67]) {
@@ -320,7 +305,6 @@
       }
       ctx.setLineDash([]);
 
-      // Update and render vehicles
       for (let v of vehicles) {
         v.depth += v.speed;
         if (v.depth > 1.0) {
@@ -336,16 +320,13 @@
         const vw = Math.max(12, 34 * scale);
         const vh = Math.max(8, 20 * scale);
 
-        // Bounding box (Green detector box)
         ctx.strokeStyle = "#22c55e";
         ctx.lineWidth = 1.5;
         ctx.strokeRect(x - vw/2 - 2, y - vh/2 - 2, vw + 4, vh + 4);
 
-        // Vehicle body
         ctx.fillStyle = v.color;
         ctx.fillRect(x - vw/2, y - vh/2, vw, vh);
 
-        // Taillights
         ctx.fillStyle = "#ef4444";
         ctx.beginPath();
         ctx.arc(x - vw/2 + 2, y + vh/2 - 2, 1.5 * scale, 0, Math.PI * 2);
@@ -357,39 +338,38 @@
     }
     requestAnimationFrame(drawRoad);
 
-    // Chart.js Setup
     function initChart() {
       const ctxChart = document.getElementById("forecastChart").getContext("2d");
       chartInstance = new Chart(ctxChart, {
         type: "line",
         data: {
-          labels: ["-50m", "-40m", "-30m", "-20m", "-10m", "Now (t)", "+5m", "+10m", "+15m"],
+          labels: ["-50m", "-40m", "-30m", "-20m", "-10m", "t (Current)", "+5m", "+10m", "+15m"],
           datasets: [
             {
-              label: "Historical / Observed Flow",
+              label: "Observed Historical Flow",
               data: [85, 92, 98, 105, 112, 118.5, null, null, null],
               borderColor: "#3b82f6",
               backgroundColor: "rgba(59, 130, 246, 0.1)",
-              borderWidth: 2.5,
-              tension: 0.3,
-              pointRadius: 4,
+              borderWidth: 2,
+              tension: 0.2,
+              pointRadius: 3,
               pointBackgroundColor: "#3b82f6"
             },
             {
-              label: "LSTM Predicted Forecast",
+              label: "BiLSTM Forecast",
               data: [null, null, null, null, null, 118.5, 120.9, 124.4, 122.1],
               borderColor: "#10b981",
-              borderDash: [5, 5],
-              borderWidth: 2.5,
-              tension: 0.3,
-              pointRadius: 5,
+              borderDash: [4, 4],
+              borderWidth: 2,
+              tension: 0.2,
+              pointRadius: 4,
               pointBackgroundColor: "#10b981"
             },
             {
               label: "95% Upper Bound",
               data: [null, null, null, null, null, 118.5, 139.5, 144.2, 142.9],
               borderColor: "transparent",
-              backgroundColor: "rgba(16, 185, 129, 0.15)",
+              backgroundColor: "rgba(16, 185, 129, 0.12)",
               fill: 1,
               pointRadius: 0
             },
@@ -398,7 +378,7 @@
               data: [null, null, null, null, null, 118.5, 102.3, 104.6, 101.3],
               borderColor: "transparent",
               fill: "-1",
-              backgroundColor: "rgba(16, 185, 129, 0.15)",
+              backgroundColor: "rgba(16, 185, 129, 0.12)",
               pointRadius: 0
             }
           ]
@@ -438,8 +418,6 @@
         const json = await res.json();
         updateUI(json);
       } catch (err) {
-        console.warn("Falling back to local simulation:", err);
-        // Fallback local simulation logic
         fallbackSimulation(scenario, customFlow);
       }
     }
@@ -489,21 +467,21 @@
 
       document.getElementById("kpi-count").innerText = m.detected_vehicle_count;
       document.getElementById("kpi-flow").innerText = m.current_flow_rate_veh_5min;
-      document.getElementById("kpi-flow-hr").innerText = `~${m.current_flow_rate_veh_hour} veh/hr`;
+      document.getElementById("kpi-flow-hr").innerText = `~${m.current_flow_rate_veh_hour} vehicles/hr`;
       document.getElementById("kpi-speed").innerText = m.average_speed_kmh;
-      document.getElementById("kpi-occupancy").innerText = `Occupancy: ${m.road_occupancy_pct}%`;
+      document.getElementById("kpi-occupancy").innerText = `Road Occupancy: ${m.road_occupancy_pct}%`;
       
       const badge = document.getElementById("kpi-badge");
       badge.innerText = m.congestion_level_label.toUpperCase();
 
       if (m.congestion_level_label.includes("Free")) {
-        badge.className = "inline-block px-3 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.className = "inline-block px-2.5 py-1 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
       } else if (m.congestion_level_label.includes("Moderate")) {
-        badge.className = "inline-block px-3 py-1 rounded-md text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30";
+        badge.className = "inline-block px-2.5 py-1 rounded text-xs font-semibold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30";
       } else if (m.congestion_level_label.includes("Heavy")) {
-        badge.className = "inline-block px-3 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 status-pulse";
+        badge.className = "inline-block px-2.5 py-1 rounded text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30";
       } else {
-        badge.className = "inline-block px-3 py-1 rounded-md text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 status-pulse";
+        badge.className = "inline-block px-2.5 py-1 rounded text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30";
       }
 
       document.getElementById("fc-5m").innerText = `${fc.horizon_5min.predicted_flow} veh`;
@@ -513,10 +491,8 @@
       document.getElementById("hud-stats").innerText = `Live Detections: ${Math.round(m.detected_vehicle_count)} veh`;
       document.getElementById("hud-forecast").innerText = `+5m: ${fc.horizon_5min.predicted_flow} | +10m: ${fc.horizon_10min.predicted_flow} | +15m: ${fc.horizon_15min.predicted_flow}`;
 
-      // Update vehicle simulation count
       initVehicles(Math.round(m.detected_vehicle_count));
 
-      // Update chart
       const curr = m.current_flow_rate_veh_5min;
       const hData = [
         Math.max(10, curr * 0.75),
@@ -541,9 +517,9 @@
     function setScenario(scenario) {
       currentScenario = scenario;
       document.querySelectorAll(".scenario-btn").forEach(b => {
-        b.className = "scenario-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+        b.className = "scenario-btn px-3 py-1.5 rounded text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
       });
-      event.target.className = "scenario-btn active px-3.5 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white shadow hover:bg-indigo-500 transition";
+      event.target.className = "scenario-btn active px-3 py-1.5 rounded text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition";
 
       let defaultVal = 118;
       if (scenario === "moderate") defaultVal = 64;
